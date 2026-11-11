@@ -7,6 +7,9 @@
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex, nofollow">
 <title>Carnet de vol</title>
+<link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAsUlEQVR42mNgQAJXteW8gXgzEL8H4v9Uxu+hZnszoAOgIDcQL6eBpbgwyC5uZAfQ03K4I5CD/f8AYW8GaLwMlAM2M9AowRGdMBnI0fiir/3/+/WrUDBIjByzyHLAl1PH/qMDkNioA0YdMLwcAMpWIEOx4T8fP2A4ACSGSz2+LIrTAaC8TS0AMmvUAUPPAQOeCEfLgVEHjDqAnk2yAW+UDnizfGA7JgPeNRsUndOB7J4DANK1jmhy6PyJAAAAAElFTkSuQmCC">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cstyle%3Erect.b%7Bfill:%23D52B1E%7D%40media (prefers-color-scheme:dark)%7Brect.b%7Bfill:%23FF453A%7D%7D%3C/style%3E%3Crect class='b' width='20' height='20' rx='4'/%3E%3Crect x='8.25' y='4' width='3.5' height='12' fill='%23FFF'/%3E%3Crect x='4' y='8.25' width='12' height='3.5' fill='%23FFF'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAACK0lEQVR42u3csQ2AIBRFUSZxAfdfwYLePSSxJIEwAYUFCOcltzbBU/9wn0eRVil4BAEtAS0BLQEtoCWgJaAloCWgBbQEtAS0BLQEtICWgJaAloCWgBbQEtAS0BLQEtACWgJaAloCWgJaQEtAS0BLQEtAC+hNe+NVRq192z8AGmigBTTQQAMNNNBAAw20gAYaaAENNNBAAw000EADLaCBBlpAAw000EADDTTQQAtooIEW0EADDTTQQAMNNNACGmiggQYaaKCBBhpooIEGWkADDTTQQAMNNNBAAw000EAD7SGABhpooIEGGmiggQYaaKCBFtBAAw000D04M5bTMwx0+/as7wJ0J/vXgAYaaKANaKANaKANaKCBBhpooIE2oIE2oIE2oIEGGmiggQbagAbagAbagAYaaKCBBhpoAxpoAxpoAxpooIEGGmigDWigDWigDWiggQbagAbagAbagAbagHZO98uc03Xw3MFzB88FNNBAAw000EADDbSABhpoAQ000EADDTTQQAMtoIEGWkADDTTQQAMNNNBAC2iggRbQQAMNNNBAAw000AIaaKAFNNBAAw000EADDbSABhpooIEGGmiggQYaaKCBFtBAAw000EADDTTQQAMNNNBAC2iggQYaaKCBBloCWkBLQEtAS0BLQAtoCWgJaAloCWgBLQEtAS0BLQEtoCWgJaAloCWgBbQEtAS0BLQEtICWgJaAloAW0B5BQEtAS0BLQGvXKt+HAUtkVxifAAAAAElFTkSuQmCC">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -128,7 +131,12 @@ dt{font-size:13px;color:var(--ink2)}
 .kpis dd,.tots dd{margin:0;font-size:20px;font-weight:600;letter-spacing:-.01em;white-space:nowrap}
 @media (max-width:560px){.kpis{grid-template-columns:repeat(2,auto)}.big{font-size:60px}}
 .scale{position:relative;padding-top:36px}
-.scale .now{position:absolute;top:0;transform:translateX(-50%);font-size:13px;font-weight:500;white-space:nowrap}
+.scale .now{position:absolute;top:0;transform:translateX(-50%);font-size:13px;font-weight:500;white-space:nowrap;transition:opacity .2s ease}
+.scale.hov .now{opacity:0}
+.scale .tip{position:absolute;top:-2px;transform:translateX(-50%);display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:6px;background:var(--ink);color:var(--bg);font-size:12px;font-weight:600;letter-spacing:.02em;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s ease}
+.scale .hl{position:absolute;top:22px;width:1px;height:30px;background:var(--ink2);pointer-events:none;opacity:0;transition:opacity .15s ease}
+.scale.hov .tip,.scale.hov .hl{opacity:1}
+.scale .hit{position:absolute;left:0;right:0;top:16px;height:44px;cursor:default;touch-action:pan-y}
 .scale .tick{position:absolute;top:22px;width:1px;height:30px;background:var(--ink)}
 .scale .bar{height:6px;border-radius:3px;background:var(--track);overflow:hidden}
 .scale .bar i{display:block;height:6px;border-radius:3px;background:var(--accent);animation-delay:250ms}
@@ -253,6 +261,25 @@ dt{font-size:13px;color:var(--ink2)}
 .note{margin:12px 8px 16px;font-size:13px;color:var(--ink2)}
 .note.err{color:var(--accent)}
 
+/* ---------- téléphone et iPad portrait : menu compact en haut ---------- */
+.mfoot{display:none}
+@media (max-width:899px){
+  aside{position:sticky;top:0;z-index:20;flex-basis:100%;padding:max(12px,env(safe-area-inset-top)) 16px 0;gap:10px;background:var(--bg);border-bottom:1px solid var(--line)}
+  .brand{padding:0}
+  nav.side{flex-direction:row;gap:4px;overflow-x:auto;margin:0 -16px;padding:0 16px 10px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  nav.side::-webkit-scrollbar{display:none}
+  .nav{width:auto;flex:none;padding:7px 12px;border-radius:8px}
+  .nav span+span{display:none}
+  .sfoot{display:none}
+  main{padding:20px 16px 48px}
+  .mfoot{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin-top:64px;padding-top:16px;border-top:1px solid var(--line)}
+  .h1{font-size:28px}
+  .section{margin-top:56px}
+}
+@media (max-width:899px) and (min-width:600px){
+  main{padding:28px 32px 56px}
+}
+
 /* ---------- connexion ---------- */
 .gate{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg)}
 .gate .box{width:100%;max-width:340px;display:flex;flex-direction:column;gap:20px}
@@ -329,6 +356,7 @@ dt{font-size:13px;color:var(--ink2)}
       <div class="field"><div><span>Connecté</span><span class="sm" id="whoami"></span></div><button type="button" class="btn" id="logout">Se déconnecter</button></div>
     </div>
   </div>
+  <div class="mfoot sm"><span class="nw" style="display:inline-flex;align-items:center;gap:8px"><span class="dot" id="mdot"><span class="pulse"></span><span></span></span><span id="msync"></span></span><span>·</span><span id="mrole"></span><span>·</span><button type="button" class="linkbtn" id="mlogout">Se déconnecter</button></div>
 </main>
 </div>
 
@@ -584,6 +612,7 @@ function vApercu(){
     <div class="scale" role="img" aria-label="${f1(R.T)} heures sur 200, ${Math.floor(cplP*100)} pour cent de l’exigence du CPL">
       <div class="now" style="left:${lp}%">Aujourd’hui</div><div class="tick" style="left:${cp}%"></div>
       <div class="bar"><i class="gx" style="width:${cp}%"></i></div><div class="ruler"></div>
+      <div class="hl" aria-hidden="true"></div><div class="tip" aria-hidden="true"></div><div class="hit" aria-hidden="true"></div>
       <div class="lbl"><span style="left:0">0</span><span style="left:25%">50</span><span style="left:50%">100</span><span style="left:75%">150</span><span class="end">200 h · CPL</span></div>
     </div>
   </section>
@@ -742,6 +771,7 @@ function vComprendre(){
 const VIEWS={apercu:vApercu,recence:vRecence,progression:vProgression,carnet:vCarnet,comprendre:vComprendre};
 function renderNav(){
   $("#nav").innerHTML=PAGES.filter(([id])=>id!=="reglages"||CANW).map(([id,l,q])=>`<button type="button" class="nav" data-go="${id}" aria-current="${id===PAGE?"page":"false"}"><span>${l}</span><span class="sm nw">${q}</span></button>`).join("");
+  const on=$("#nav [aria-current=page]");if(on&&$("#nav").scrollWidth>$("#nav").clientWidth)on.scrollIntoView({block:"nearest",inline:"center"});
 }
 function eyebrow(){const t=today.toLocaleDateString("fr-CA",{weekday:"long"});return PAGE==="apercu"?cap(t)+" "+fdL(today):PAGES.find(p=>p[0]===PAGE)[1]}
 function render(anim){
@@ -752,15 +782,49 @@ function render(anim){
   if(reg){$("#view").innerHTML="";if(anim){const v=$("#v-reglages");v.classList.remove("rise");void v.offsetWidth;v.classList.add("rise")}return}
   $("#view").innerHTML=VIEWS[PAGE]();
   if(PAGE==="carnet")renderFlights();
+  if(PAGE==="apercu")bindScale();
   if(PAGE==="apercu"&&anim&&!reduce())countUp();
+}
+// Survol de la barre des heures totales : à quelle date le cumul a atteint ce nombre d'heures
+function bindScale(){
+  const sc=$(".scale"),hit=sc&&sc.querySelector(".hit");if(!hit)return;
+  const asc=[...F].reverse();let run=0;const cum=asc.map(f=>(run+=f.tot,{h:run,d:f.d}));const T=run;
+  const tip=sc.querySelector(".tip"),hl=sc.querySelector(".hl"),bar=sc.querySelector(".bar");
+  const show=ev=>{
+    const r=bar.getBoundingClientRect();const fr=Math.max(0,Math.min(1,(ev.clientX-r.left)/r.width));
+    const h=Math.round(fr*200);let txt;
+    if(h<=0)txt="0 h";
+    else if(h>T+1e-9)txt=h+" h · encore "+f1(h-T)+" h";
+    else{const c=cum.find(x=>x.h>=h-1e-9);txt=h+" h · "+fdS(c.d)}
+    tip.textContent=txt;
+    hl.style.left=(fr*100)+"%";
+    tip.style.left=Math.max(6,Math.min(94,fr*100))+"%";
+    sc.classList.add("hov");
+  };
+  hit.addEventListener("pointermove",show);hit.addEventListener("pointerdown",show);
+  hit.addEventListener("pointerleave",()=>sc.classList.remove("hov"));
 }
 let RAF=0;
 function countUp(){const el=$("#total");if(!el)return;const target=sum(F,f=>f.tot),t0=performance.now();cancelAnimationFrame(RAF);
   const step=now=>{const p=Math.min(1,(now-t0)/1300);if(!document.body.contains(el))return;el.textContent=f1(target*(1-Math.pow(1-p,4)));if(p<1)RAF=requestAnimationFrame(step)};RAF=requestAnimationFrame(step)}
 function route(){const h=location.hash.slice(1);PAGE=VIEWS[h]||(h==="reglages"&&CANW)?h:"apercu";render(true);try{window.scrollTo({top:0,behavior:reduce()?"auto":"smooth"})}catch(e){window.scrollTo(0,0)}}
+// Changement de mois : on met à jour sur place (sans redessiner le graphique) et les barres
+// du détail glissent de l'ancienne valeur vers la nouvelle (transition CSS sur width).
+function selectMonth(i){
+  MONTH=i;
+  $$(".mcol").forEach((b,j)=>b.setAttribute("aria-pressed",j===i));
+  $$(".mlabels span").forEach((s,j)=>s.classList.toggle("on",j===i));
+  const d=$("#mdetail");if(!d)return;
+  const old=[...d.querySelectorAll(".split .t i")].map(x=>x.style.width);
+  const M=months12();d.innerHTML=monthHTML(M,sum(M,x=>x.h)/12);
+  const bars=[...d.querySelectorAll(".split .t i")],target=bars.map(x=>x.style.width);
+  bars.forEach((x,j)=>{x.style.transition="none";x.style.width=old[j]||"0%"});
+  void d.offsetWidth;
+  bars.forEach((x,j)=>{x.style.transition="";x.style.width=target[j]});
+}
 document.addEventListener("click",ev=>{
   const g=ev.target.closest("[data-go]");if(g){const p=g.dataset.go;if(location.hash==="#"+p)route();else location.hash=p;return}
-  const m=ev.target.closest(".mcol");if(m){MONTH=+m.dataset.m;const a=$("#act");if(a)a.innerHTML=actHTML(false);return}
+  const m=ev.target.closest(".mcol");if(m){selectMonth(+m.dataset.m);return}
   const c=ev.target.closest(".chip");if(c){FILTER=c.dataset.f;renderFlights();return}
 });
 
@@ -780,7 +844,7 @@ function bind(){
   KEYS_V.forEach(k=>{const el=$("#"+k);el.addEventListener("change",()=>{S[k]=el.value;save()})});
   KEYS_C.forEach(k=>{const el=$("#"+k);el.addEventListener("change",()=>{S[k]=el.checked;save()})});
   $("#recauto").addEventListener("click",()=>{const f=F.find(x=>x.dual>0);if(!f)return;const v=f.d.getFullYear()+"-"+String(f.d.getMonth()+1).padStart(2,"0")+"-"+String(f.d.getDate()).padStart(2,"0");S.rec=v;$("#rec").value=v;save()});
-  $("#logout").addEventListener("click",logout);$("#slogout").addEventListener("click",logout);
+  $("#logout").addEventListener("click",logout);$("#mlogout").addEventListener("click",logout);$("#slogout").addEventListener("click",logout);
   const drop=$("#drop"),file=$("#file");
   const read=fl=>{if(!fl)return;const r=new FileReader();r.onload=()=>{const t=String(r.result);try{parse(t);csvText=t;load();push(true)}catch(e){$("#csvstatus").textContent=e.message}};r.readAsText(fl)};
   file.addEventListener("change",()=>read(file.files[0]));
@@ -798,6 +862,7 @@ function foot(){
   $("#sdot").classList.toggle("off",!SYNC);
   $("#ssync").textContent=SYNC?"Synchronisé "+ago():(READY?"Reconnexion…":"Connexion…");
   $("#srole").textContent=CANW?"Modification permise":"Lecture seule";
+  $("#mdot").classList.toggle("off",!SYNC);$("#msync").textContent=$("#ssync").textContent;$("#mrole").textContent=$("#srole").textContent;
 }
 setInterval(()=>{if(READY)foot()},60000);
 function gate(st,msg,err){const g=$("#gate");g.hidden=!st;if(!st)return;g.dataset.s=st;const m=$("#gmsg");m.textContent=msg||"";m.classList.toggle("err",!!err);
