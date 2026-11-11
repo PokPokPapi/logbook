@@ -264,6 +264,7 @@ dt{font-size:13px;color:var(--ink2)}
 /* ---------- téléphone et iPad portrait : menu compact en haut ---------- */
 .mfoot{display:none}
 @media (max-width:899px){
+  body{padding-top:0}
   aside{position:sticky;top:0;z-index:20;flex-basis:100%;padding:max(12px,env(safe-area-inset-top)) 16px 0;gap:10px;background:var(--bg);border-bottom:1px solid var(--line)}
   .brand{padding:0}
   nav.side{flex-direction:row;gap:4px;overflow-x:auto;margin:0 -16px;padding:0 16px 10px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
@@ -380,11 +381,10 @@ dt{font-size:13px;color:var(--ink2)}
 <script>
 (function(){
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
-const DAY=864e5;const today=new Date();today.setHours(0,0,0,0);
-const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
-const DEF={ppl:"2024-04-17",excl:"CGNIV",written:true,xc300:false,ftest:false,multi:false,inrat:false,ifrxc:false,ifrtest:false,dual:true,rec:"",medd:"",medc:"1",over40:false};
+const DAY=864e5;let today=new Date();today.setHours(0,0,0,0);
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+const DEF={ppl:"2024-04-17",written:true,xc300:false,ftest:false,multi:false,inrat:false,ifrxc:false,ifrtest:false,dual:true,rec:"",medd:"",medc:"1",over40:false};
 let S=Object.assign({},DEF);
-store.del("csv");store.del("settings");
 let csvText="",UPDATED=null;
 const reduce=()=>window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -616,7 +616,7 @@ function vApercu(){
       <div class="lbl"><span style="left:0">0</span><span style="left:25%">50</span><span style="left:50%">100</span><span style="left:75%">150</span><span class="end">200 h · CPL</span></div>
     </div>
   </section>
-  <section class="section" aria-labelledby="h-act" style="gap:24px" id="act">${actHTML(true)}</section>
+  <section class="section" aria-labelledby="h-act" style="gap:24px" id="act">${actHTML()}</section>
   <section class="section" aria-labelledby="h-next" style="gap:12px" id="next">${nextHTML()}</section></div>`;
 }
 
@@ -655,7 +655,7 @@ function months12(){
     out.push({d,L,h:sum(L,f=>f.tot),pic:sum(L,f=>f.pic),dual:sum(L,f=>f.dual),inst:sum(L,f=>f.inst+f.sim),night:sum(L,f=>f.night)})}
   return out;
 }
-function actHTML(anim){
+function actHTML(){
   const M=months12(),tot=sum(M,m=>m.h),n=sum(M,m=>m.L.length),avg=tot/12,mx=Math.max(...M.map(m=>m.h),1)*1.06;
   const H=v=>Math.round(v/mx*170);
   return `<div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:4px 24px">
@@ -663,7 +663,7 @@ function actHTML(anim){
   <div style="display:flex;flex-wrap:wrap;gap:40px 56px">
     <div style="flex:3 1 380px;min-width:0;display:flex;flex-direction:column;gap:8px">
       <div class="chart">${avg?`<div class="avg" aria-hidden="true" style="bottom:${H(avg)}px"></div>`:""}
-      ${M.map((m,i)=>`<button type="button" class="mcol" data-m="${i}" aria-pressed="${i===MONTH}" aria-label="${cap(MOL[m.d.getMonth()])} ${m.d.getFullYear()}, ${f1(m.h)} heures"><span class="mbar${anim?" gy":""}" style="height:${H(m.h)}px;animation-delay:${ms(i,300)}"></span></button>`).join("")}</div>
+      ${M.map((m,i)=>`<button type="button" class="mcol" data-m="${i}" aria-pressed="${i===MONTH}" aria-label="${cap(MOL[m.d.getMonth()])} ${m.d.getFullYear()}, ${f1(m.h)} heures"><span class="mbar gy" style="height:${H(m.h)}px;animation-delay:${ms(i,300)}"></span></button>`).join("")}</div>
       <div class="mlabels">${M.map((m,i)=>`<span class="${i===MONTH?"on":""}">${MOL[m.d.getMonth()][0].toUpperCase()}</span>`).join("")}</div>
     </div>
     <div style="flex:1 1 260px;display:flex;flex-direction:column;gap:20px" id="mdetail">${monthHTML(M,avg)}</div>
@@ -691,7 +691,7 @@ function vRecence(){
 }
 
 function vProgression(){
-  const R=reqs(),st=stages(R).filter(x=>x.k!=="spp"||true);
+  const R=reqs(),st=stages(R);
   const grp=(title,src,url,items)=>`<section style="margin-top:56px;display:flex;flex-direction:column">
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px 24px;padding-bottom:16px"><h2 class="h2">${title}</h2>
     <span class="sm">${items.filter(r=>r.done).length} / ${items.length} complétés · <a href="${url}" target="_blank" rel="noopener">${src} ↗</a></span></div>
@@ -846,7 +846,7 @@ function bind(){
   $("#recauto").addEventListener("click",()=>{const f=F.find(x=>x.dual>0);if(!f)return;const v=f.d.getFullYear()+"-"+String(f.d.getMonth()+1).padStart(2,"0")+"-"+String(f.d.getDate()).padStart(2,"0");S.rec=v;$("#rec").value=v;save()});
   $("#logout").addEventListener("click",logout);$("#mlogout").addEventListener("click",logout);$("#slogout").addEventListener("click",logout);
   const drop=$("#drop"),file=$("#file");
-  const read=fl=>{if(!fl)return;const r=new FileReader();r.onload=()=>{const t=String(r.result);try{parse(t);csvText=t;load();push(true)}catch(e){$("#csvstatus").textContent=e.message}};r.readAsText(fl)};
+  const read=fl=>{if(!fl)return;const r=new FileReader();r.onload=()=>{const t=String(r.result);try{parse(t);csvText=t;load();SENDCSV=true;push(true)}catch(e){$("#csvstatus").textContent=e.message}};r.readAsText(fl)};
   file.addEventListener("change",()=>read(file.files[0]));
   ["dragenter","dragover"].forEach(e=>drop.addEventListener(e,ev=>{ev.preventDefault();drop.classList.add("over")}));
   ["dragleave","drop"].forEach(e=>drop.addEventListener(e,ev=>{ev.preventDefault();drop.classList.remove("over")}));
@@ -856,7 +856,8 @@ function save(){push()}
 
 /* ---------- synchro Supabase (temps réel) ---------- */
 const SB=supabase.createClient("https://rjxvhqgbazhvfggtgylb.supabase.co","sb_publishable_MbvU8O960ba1WpCnYNOYwA_kG5-ress",{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
-let SYNC=false,CANW=false,READY=false,CH=null,PT=null,PENDING=false,STARTED=false,SEQ=0;
+// SENDCSV : seul un import renvoie le CSV, sinon un appareil en retard écraserait le carnet récent.
+let SENDCSV=false,SYNC=false,CANW=false,READY=false,CH=null,PT=null,PENDING=false,STARTED=false,SEQ=0;
 function ago(){if(!UPDATED)return "";const m=Math.max(0,Math.round((Date.now()-UPDATED)/6e4));return m<1?"à l’instant":m<60?"il y a "+m+" min":m<1440?"il y a "+Math.round(m/60)+" h":"il y a "+Math.round(m/1440)+" j"}
 function foot(){
   $("#sdot").classList.toggle("off",!SYNC);
@@ -864,14 +865,16 @@ function foot(){
   $("#srole").textContent=CANW?"Modification permise":"Lecture seule";
   $("#mdot").classList.toggle("off",!SYNC);$("#msync").textContent=$("#ssync").textContent;$("#mrole").textContent=$("#srole").textContent;
 }
-setInterval(()=>{if(READY)foot()},60000);
+// Page restée ouverte (veille, app d'écran d'accueil) : la récence doit suivre le vrai jour.
+function newDay(){const t=new Date();t.setHours(0,0,0,0);if(t-today&&READY){today=t;render(false)}}
+setInterval(()=>{if(READY){newDay();foot()}},60000);
 function gate(st,msg,err){const g=$("#gate");g.hidden=!st;if(!st)return;g.dataset.s=st;const m=$("#gmsg");m.textContent=msg||"";m.classList.toggle("err",!!err);
   $("#ghint").textContent=st==="login"?"Accès réservé. Connecte-toi.":st==="loading"?"Chargement du carnet…":"Accès réservé."}
 function push(now){if(!CANW)return;PENDING=true;clearTimeout(PT);PT=setTimeout(async()=>{
-  const{data,error}=await SB.from("logbook").update({csv:csvText,settings:S}).eq("id",1).select("id,updated_at");
+  const{data,error}=await SB.from("logbook").update(SENDCSV?{csv:csvText,settings:S}:{settings:S}).eq("id",1).select("id,updated_at");
   PENDING=false;
   if(error||!data||!data.length){$("#csvstatus").textContent="Échec de l’enregistrement"+(error?" : "+error.message:" : accès refusé.");$("#csvstatus").classList.add("err");CANW=false;applyRole();fetchRow().catch(()=>{})}
-  else{$("#csvstatus").classList.remove("err");if(data[0].updated_at)UPDATED=new Date(data[0].updated_at).getTime();foot()}
+  else{SENDCSV=false;$("#csvstatus").classList.remove("err");if(data[0].updated_at)UPDATED=new Date(data[0].updated_at).getTime();foot()}
  },now?0:400)}
 function applyRole(){
   $$("#v-reglages input,#v-reglages select,#v-reglages button:not(#logout)").forEach(el=>el.disabled=!CANW);
@@ -919,7 +922,7 @@ async function start(session){
 }
 function teardown(){
   if(CH){SB.removeChannel(CH);CH=null}
-  clearTimeout(PT);PENDING=false;READY=false;STARTED=false;SYNC=false;CANW=false;csvText="";F=[];LASTDATA="";NEXT=[];NEXTKEY="";
+  clearTimeout(PT);SENDCSV=false;PENDING=false;READY=false;STARTED=false;SYNC=false;CANW=false;csvText="";F=[];LASTDATA="";NEXT=[];NEXTKEY="";
   $("#gpass").value="";$("#whoami").textContent="";$("#view").innerHTML="";gate("login");
 }
 async function logout(){teardown();await SB.auth.signOut().catch(()=>{})}
@@ -939,7 +942,7 @@ SB.auth.onAuthStateChange((ev,session)=>{
     else if(!session&&(ev==="INITIAL_SESSION"||ev==="SIGNED_OUT"))teardown()
   },0);
 });
-document.addEventListener("visibilitychange",()=>{if(!document.hidden&&READY){fetchRow().catch(()=>{});fetchNext().catch(()=>{})}});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&READY){newDay();fetchRow().catch(()=>{});fetchNext().catch(()=>{})}});
 setInterval(()=>{if(READY&&!document.hidden)fetchNext().catch(()=>{})},5*60000);
 bind();gate("loading");addEventListener("hashchange",route);
 })();
