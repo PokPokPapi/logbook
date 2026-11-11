@@ -791,9 +791,16 @@ function applyRole(){
   if(!CANW&&PAGE==="reglages"){location.hash="apercu"}
   foot();
 }
+let LASTDATA="";
 function apply(d){
   if(PENDING)return;
-  csvText=d.csv||"";UPDATED=d.updated_at?new Date(d.updated_at).getTime():null;
+  UPDATED=d.updated_at?new Date(d.updated_at).getTime():null;
+  // Ne redessiner que si les données ont changé : sinon la relecture faite à la connexion
+  // du temps réel (ou au retour sur l'onglet) coupe les animations d'entrée.
+  const key=(d.csv||"")+"\u0000"+JSON.stringify(d.settings||{});
+  if(key===LASTDATA){if(READY)foot();return}
+  LASTDATA=key;
+  csvText=d.csv||"";
   S=Object.assign({},DEF,d.settings&&typeof d.settings==="object"?d.settings:{});
   load();syncInputs();
   if(READY){render(false);foot()}
@@ -823,7 +830,7 @@ async function start(session){
 }
 function teardown(){
   if(CH){SB.removeChannel(CH);CH=null}
-  clearTimeout(PT);PENDING=false;READY=false;STARTED=false;SYNC=false;CANW=false;csvText="";F=[];
+  clearTimeout(PT);PENDING=false;READY=false;STARTED=false;SYNC=false;CANW=false;csvText="";F=[];LASTDATA="";
   $("#gpass").value="";$("#whoami").textContent="";$("#view").innerHTML="";gate("login");
 }
 async function logout(){teardown();await SB.auth.signOut().catch(()=>{})}
