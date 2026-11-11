@@ -149,14 +149,13 @@ dt{font-size:13px;color:var(--ink2)}
 .split .v{text-align:right;font-weight:500}
 .split .t{grid-column:1/-1;height:2px;background:var(--track)}
 .split .t i{display:block;height:2px;background:var(--ink);transition:width .5s cubic-bezier(.2,.7,.2,1)}
-.grid5{display:grid;grid-template-columns:80px minmax(0,1.6fr) 120px minmax(150px,1fr) 72px;gap:16px;align-items:center}
+.gridn{display:grid;grid-template-columns:104px minmax(0,1.6fr) 120px minmax(150px,1fr) 112px;gap:16px;align-items:center}
 .grid6{display:grid;grid-template-columns:80px minmax(0,1.6fr) 120px minmax(150px,1fr) 72px 16px;gap:16px;align-items:center}
 .cell2{display:flex;flex-direction:column;white-space:nowrap;min-width:0}
 .cell2 .r{font-weight:500;letter-spacing:.02em;overflow:hidden;text-overflow:ellipsis}
 .cell2 .s{font-size:13px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis}
 .dte{font-weight:500;white-space:nowrap}
 .dur{text-align:right;font-weight:600;white-space:nowrap}
-.ghost{border:0;background:transparent;padding:8px 0;font-size:13px;font-weight:500;cursor:pointer}
 
 /* ---------- rows (récence / progression) ---------- */
 .rows{border-bottom:1px solid var(--line)}
@@ -589,12 +588,37 @@ function vApercu(){
     </div>
   </section>
   <section class="section" aria-labelledby="h-act" style="gap:24px" id="act">${actHTML(true)}</section>
-  <section class="section" aria-labelledby="h-last" style="gap:12px">
-    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:24px"><h2 class="h2" id="h-last">Derniers vols</h2><button type="button" class="ghost" data-go="carnet">Tout le carnet →</button></div>
-    <div style="overflow-x:auto;margin:0 -12px"><div role="table" aria-label="Derniers vols" style="min-width:620px">
-      ${F.length?F.slice(0,3).map(x=>`<div role="row" class="frow grid5" style="padding:14px 12px;border-radius:10px">${rowCells(x,false)}</div>`).join(""):`<div class="empty">Aucun vol.</div>`}
-    </div></div>
-  </section></div>`;
+  <section class="section" aria-labelledby="h-next" style="gap:12px" id="next">${nextHTML()}</section></div>`;
+}
+
+/* ---------- prochains vols (réservations FSP, via fsp-sync) ---------- */
+let NEXT=[];
+const TZ="America/Toronto",WD={Sun:"Dim.",Mon:"Lun.",Tue:"Mar.",Wed:"Mer.",Thu:"Jeu.",Fri:"Ven.",Sat:"Sam."};
+const tzp=d=>{const o={};new Intl.DateTimeFormat("en-CA",{timeZone:TZ,weekday:"short",year:"numeric",month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).formatToParts(d).forEach(p=>o[p.type]=p.value);return o};
+const dayNo=o=>Date.UTC(+o.year,+o.month-1,+o.day)/DAY;
+function nextHTML(){
+  const L=NEXT.slice(0,4),now=tzp(new Date());
+  const hm=o=>o.hour.padStart(2,"0")+" h "+o.minute;
+  const rows=L.map(b=>{
+    const s=tzp(new Date(b.start_at)),e=tzp(new Date(b.end_at)),dd=dayNo(s)-dayNo(now);
+    const [ac,rg]=(b.aircraft||"—").split(" · ");
+    const dual=/^vol double/i.test(b.title||"");
+    return `<div role="row" class="frow gridn" style="padding:14px 12px;border-radius:10px">
+      <span role="cell" style="display:flex;flex-direction:column;white-space:nowrap"><span style="font-weight:500">${WD[s.weekday]||""} ${+s.day} ${MOS[+s.month-1]}</span><span class="sm">${hm(s)} – ${hm(e)}</span></span>
+      <span role="cell" class="cell2"><span class="r">CYMX</span><span class="s">${apn("CYMX")} (local)</span></span>
+      <span role="cell" class="cell2"><span>${esc(ac)}</span><span class="s">${esc(rg||"")}</span></span>
+      <span role="cell" class="cell2"><span>${dual?"Double":"Commandant de bord"}</span><span class="s">Local</span></span>
+      <span role="cell" style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><span class="pill ok">Confirmé</span><span class="sm nw">${dd<=0?"Aujourd’hui":dd===1?"Demain":"Dans "+dd+" j"}</span></span></div>`}).join("");
+  return `<div style="display:flex;justify-content:space-between;align-items:baseline;gap:24px"><h2 class="h2" id="h-next">Prochains vols</h2><span class="sm">${NEXT.length?NEXT.length+" réservé"+(NEXT.length>1?"s":"")+" · "+NEXT.length+" confirmé"+(NEXT.length>1?"s":""):""}</span></div>
+    ${L.length?`<div style="overflow-x:auto;margin:0 -12px"><div role="table" aria-label="Prochains vols" style="min-width:680px">${rows}</div></div>`:`<p class="sm" style="margin:0">Aucun vol réservé.</p>`}`;
+}
+let NEXTKEY="";
+async function fetchNext(){
+  const{data,error}=await SB.rpc("upcoming_flights");
+  if(error)throw error;
+  const k=JSON.stringify(data||[]);if(k===NEXTKEY)return;NEXTKEY=k;
+  NEXT=data||[];
+  const el=$("#next");if(el)el.innerHTML=nextHTML();
 }
 function months12(){
   const out=[];for(let i=11;i>=0;i--){const d=addM(new Date(today.getFullYear(),today.getMonth(),1),-i);
@@ -825,12 +849,12 @@ async function start(session){
     const{data:w,error:we}=await SB.rpc("can_write_logbook");if(we)throw we;
     CANW=w===true;
     await fetchRow();
-    READY=true;applyRole();gate(null);route();subscribe();
+    READY=true;applyRole();gate(null);route();subscribe();fetchNext().catch(()=>{});
   }catch(e){STARTED=false;gate("error","Impossible de charger le carnet : "+((e&&e.message)||e),true)}
 }
 function teardown(){
   if(CH){SB.removeChannel(CH);CH=null}
-  clearTimeout(PT);PENDING=false;READY=false;STARTED=false;SYNC=false;CANW=false;csvText="";F=[];LASTDATA="";
+  clearTimeout(PT);PENDING=false;READY=false;STARTED=false;SYNC=false;CANW=false;csvText="";F=[];LASTDATA="";NEXT=[];NEXTKEY="";
   $("#gpass").value="";$("#whoami").textContent="";$("#view").innerHTML="";gate("login");
 }
 async function logout(){teardown();await SB.auth.signOut().catch(()=>{})}
@@ -850,7 +874,8 @@ SB.auth.onAuthStateChange((ev,session)=>{
     else if(!session&&(ev==="INITIAL_SESSION"||ev==="SIGNED_OUT"))teardown()
   },0);
 });
-document.addEventListener("visibilitychange",()=>{if(!document.hidden&&READY)fetchRow().catch(()=>{})});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&READY){fetchRow().catch(()=>{});fetchNext().catch(()=>{})}});
+setInterval(()=>{if(READY&&!document.hidden)fetchNext().catch(()=>{})},5*60000);
 bind();gate("loading");addEventListener("hashchange",route);
 })();
 </script>
